@@ -2,6 +2,7 @@ var numberOne;
 var numberTwo;
 var numberThree;
 var currentQuestion;
+var interval;
 
 var questions = [ {
     q: "Which character has NEVER been the chair of the party planning committee?",
@@ -43,7 +44,7 @@ var questions = [ {
     q: "What is the name of Ryan's social networking venture?",
     a: ["ARPHF.com", "WUPHF.com", "BARQ.com", "RUPHF.com"],
     correct: "WUPHF.com",
-    img: "wuphf.jpg"
+    img: "wuphf.com.jpg"
 },
 {
     q: "What is the name of Jim and Pam's eldest child?",
@@ -55,21 +56,46 @@ var questions = [ {
 
 ];
 function displayQuestion() {
+    var counter = 20;
+    $("#countdown").text(counter);
+
+    interval = setInterval(function() {
+        counter--;
+        $("#countdown").text(counter);
+        if (counter == 0) {
+            numberThree++;
+            clearInterval(interval);
+            $("#pic").show();
+            $("#answer").text(questions[currentQuestion].correct);
+            $("#pic").attr("src", "assets/images/" + questions[currentQuestion].img);
+            $(".a").attr("disabled", true);
+            questionDelay();
+
+        }
+    }, 1000);
+
     var next = questions[currentQuestion];
     $("#q").text(next.q);
     $("#a0").text(next.a[0]);
     $("#a1").text(next.a[1]);
     $("#a2").text(next.a[2]);
     $("#a3").text(next.a[3]);
+
+    $(".a").attr("disabled", false);
 }
-
-function rightAnswer() {
-
-}
-
-
-
-function wrongAnswer() {
+function questionDelay() {
+    setTimeout(function() {
+        currentQuestion++;
+        if (currentQuestion == questions.length){
+            gameOver();
+        }
+        else {
+        displayQuestion();  
+        $("#yes").hide();
+        $("#pic").hide();
+        $("#nope").hide();
+        $("#failed").hide();}
+    }, 3000);
 
 }
 
@@ -78,24 +104,60 @@ function reset() {
     
 }
 
-function updateStats() {
+function gameOver() {
+    $("#done").show();
+    $("#stats").show();
+    $("#game").hide();
+    $("#pic").hide();
+    $("#yes").hide();
+    $("#nope").hide();
+    $("#number1").text(numberOne);
+    $("#number2").text(numberTwo);
+    $("#number3").text(numberThree);
 }
 
 $(document).ready(function() {
-    $("#countdown").hide();
+    $("#question").hide();
+    $("#nope").hide();
+    $("#done").hide();
+    $("#start").show();
+    $("#timeout").hide();
+    $("#failed").hide();
+    $("#yes").hide();
+    $("h3").hide();
+    $("#stats").hide();
+
     $(".a").click(function() {
-    if ($(this).text() == questions[currentQuestion].correct){
-        $("#yes").show();
-        $("#pic").attr("src", "assets/images/" + questions[currentQuestion].img)
-    }
+        clearInterval(interval);
+
+        if ($(this).text() == questions[currentQuestion].correct){
+            $("#yes").show();
+            $("#pic").show();
+            $("#pic").attr("src", "assets/images/" + questions[currentQuestion].img)
+            numberOne++;
+        }
+        else {
+            $("#nope").show();
+            $("#failed").show();
+            $("#pic").show();
+            $("#answer").text(questions[currentQuestion].correct);
+            $("#pic").attr("src", "assets/images/" + questions[currentQuestion].img)
+            numberTwo++;
+        }
+        questionDelay();
+
+        $(".a").attr("disabled", true);
     });
-    var interval;
-    $("#start").click(function() {
+    
+    $("#start, #done").click(function() {
+        $("h3").show();
+        $("#question").show();
+        interval;
         numberOne = 0;
         $("#number1").html(numberOne);
         numberTwo = 0;
         $("#number2").html(numberTwo);
-        numberThree = 8;
+        numberThree = 0;
         $("#number3").html(numberThree);
         reset();
         displayQuestion();
@@ -104,33 +166,7 @@ $(document).ready(function() {
         $("#timeout").hide();
         $("#failed").hide();
         $("#yes").hide();
-        $("#countdown").hide();
-
-        var counter = 20;                
-        $("#countdown").text(counter);
-        interval = setInterval(function() {
-            counter--;
-            $("#countdown").text(counter);
-            if (counter == 0) {
-                clearInterval(interval);
-                $("#game").hide();
-                $("#done").hide();
-                $("#start").show();
-                $("#stats").show();
-                updateStats();
-            } else {
-                return;
-            }
-        }, 1000);
-        
-    });
-
-    $("#done").click(function() {
-        $("#game").hide();
-        $("#done").hide();
-        $("#start").show();
-        $("#stats").show();
-        clearInterval(interval);
-        updateStats();
+        $("#stats").hide();
+        $("#game").show();
     });
 });
